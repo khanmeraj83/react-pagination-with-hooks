@@ -4,9 +4,21 @@ export function useFetchData() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/posts")
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    fetch("https://jsonplaceholder.typicode.com/posts", { signal })
       .then((response) => response.json())
-      .then((data) => setData(data));
+      .then((data) => setData(data))
+      .catch((err) => {
+        if (err.name === "AbortError") {
+          console.log("Canceled!!");
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   return { data };
